@@ -7,10 +7,10 @@ class Gitfolio < Formula
   sha256 "9d7584d5e2f504eaccb0d060a0aa7564046b1dffbfd54e14f92078fde8b8a239"
   license "MIT"
 
-  depends_on "python@3.11"
+  depends_on "python@3.13"
 
   def install
-    venv = virtualenv_create(libexec, "python@3.11")
+    venv = virtualenv_create(libexec, "python@3.13")
     venv.pip_install "gitfolio-cli==#{version}"
     bin.install_symlink libexec/"bin/gitfolio"
   end
