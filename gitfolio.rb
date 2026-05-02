@@ -9,7 +9,7 @@ class Gitfolio < Formula
 
   def install
     virtualenv_create(libexec, "python@3.11")
-    system libexec/"bin/pip", "install", "gitfolio==#{version}"
+    system libexec/"bin/pip", "install", "gitfolio-cli==#{version}"
     bin.install_symlink libexec/"bin/gitfolio"
   end
 
