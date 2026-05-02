@@ -10,8 +10,8 @@ class Gitfolio < Formula
   depends_on "python@3.11"
 
   def install
-    virtualenv_create(libexec, "python@3.11")
-    system libexec/"bin/pip", "install", "gitfolio-cli==#{version}"
+    venv = virtualenv_create(libexec, "python@3.11")
+    venv.pip_install "gitfolio-cli==#{version}"
     bin.install_symlink libexec/"bin/gitfolio"
   end
 
