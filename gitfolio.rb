@@ -1,6 +1,4 @@
 class Gitfolio < Formula
-  include Language::Python::Virtualenv
-
   desc "Turn your GitHub commits into ATS-friendly resume bullets. Automatically. Every week."
   homepage "https://github.com/pranav-iiitdm/gitfolio"
   url "https://files.pythonhosted.org/packages/87/d3/2d1764773f9eb108c951f59c9517daf24f6a7a502a4233ce255094294d43/gitfolio_cli-1.0.0.tar.gz"
@@ -10,9 +8,15 @@ class Gitfolio < Formula
   depends_on "python@3.13"
 
   def install
-    venv = virtualenv_create(libexec, "python@3.13")
-    venv.pip_install "gitfolio-cli==#{version}"
-    bin.install_symlink libexec/"bin/gitfolio"
+    python = Formula["python@3.13"].opt_bin/"python3.13"
+    target = libexec/"lib"
+    system python, "-m", "pip", "install", "--target=#{target}", "gitfolio-cli==#{version}"
+    (bin/"gitfolio").write <<~EOS
+      #!/bin/bash
+      export PYTHONPATH="#{target}:$PYTHONPATH"
+      exec "#{python}" -m gitfolio.cli "$@"
+    EOS
+    chmod 0755, bin/"gitfolio"
   end
 
   test do
