@@ -8,24 +8,20 @@ class Gitfolio < Formula
   def install
     python = if File.exist?("/Library/Frameworks/Python.framework/Versions/3.13/bin/python3")
       "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3"
+    elsif File.exist?("/Library/Frameworks/Python.framework/Versions/3.11/bin/python3")
+      "/Library/Frameworks/Python.framework/Versions/3.11/bin/python3"
     else
       "python3"
     end
 
     target = libexec/"lib"
-    target.rmtree if target.exist?
     system python, "-m", "pip", "install", "--target=#{target}", "gitfolio-cli==#{version}"
 
-    # Patch installed script to find packages in --target dir
-    script = target/"bin/gitfolio"
-    content = script.read
-    patched = content.sub(
-      /^(import sys\n)/,
-      "\\1sys.path.insert(0, '#{target}')\n"
-    )
-    script.write(patched)
-
-    bin.install_symlink script
+    (bin/"gitfolio").write <<~EOS
+      #!/bin/bash
+      export PYTHONPATH="#{target}:$PYTHONPATH"
+      exec "#{python}" -c "from gitfolio.cli import main; import sys; sys.exit(main())" "$@"
+    EOS
   end
 
   test do
