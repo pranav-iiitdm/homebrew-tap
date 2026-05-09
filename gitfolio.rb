@@ -13,6 +13,7 @@ class Gitfolio < Formula
     end
 
     target = libexec/"lib"
+    target.rmtree if target.exist?
     system python, "-m", "pip", "install", "--target=#{target}", "gitfolio-cli==#{version}"
 
     # Patch installed script to find packages in --target dir
