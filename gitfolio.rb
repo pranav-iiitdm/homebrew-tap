@@ -6,7 +6,6 @@ class Gitfolio < Formula
   license "MIT"
 
   def install
-    # Use Python.org installer (Homebrew python@3.13 bottle broken on this OS)
     python = if File.exist?("/Library/Frameworks/Python.framework/Versions/3.13/bin/python3")
       "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3"
     else
@@ -16,12 +15,16 @@ class Gitfolio < Formula
     target = libexec/"lib"
     system python, "-m", "pip", "install", "--target=#{target}", "gitfolio-cli==#{version}"
 
-    (bin/"gitfolio").write <<~EOS
-      #!/bin/bash
-      export PYTHONPATH="#{target}:$PYTHONPATH"
-      exec "#{python}" -m gitfolio.cli "$@"
-    EOS
-    chmod 0755, bin/"gitfolio"
+    # Patch installed script to find packages in --target dir
+    script = target/"bin/gitfolio"
+    content = script.read
+    patched = content.sub(
+      /^(import sys\n)/,
+      "\\1sys.path.insert(0, '#{target}')\n"
+    )
+    script.write(patched)
+
+    bin.install_symlink script
   end
 
   test do
